@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
+from sqlalchemy import create_engine, update, Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -27,7 +27,7 @@ class Database():
         self.session = Session()
     
     
-    def add(self, title: str, user_name: str, telegram_id: str | int, text: str, time: datetime):
+    def add(self, title: str, user_name: str = None, telegram_id: str | int = None, text: str = None, time: datetime = None):
         message = Messages(title=title, user_name=user_name, telegram_id=telegram_id, text=text, time=time)
         
         try:
@@ -38,15 +38,26 @@ class Database():
         
     
     def get_any(self):
-        return self.session.query(Messages).all()
-    
-    
-    def get_only_new(self):
-        return self.session.query(Messages).filter(Messages.requested == False).all()
+        messages = self.session.query(Messages).all()
+        for i, message in enumerate(messages):
+            self.session.execute(update(Messages).values(requested=True).where(Messages.id==message.id))
+            m = messages[i].__dict__ 
+            m.pop("_sa_instance_state")
+            messages[i] = m
+        
+        return messages
     
     
     def get_by_date(self, date: datetime):
-        return self.session.query(Messages).filter(Messages.time.date() == date.date()).all()
+        messages = self.session.query(Messages).filter(Messages.time == date).all()
+    
+        for i, message in enumerate(messages):
+            self.session.execute(update(Messages).values(requested=True).where(Messages.id==message.id))
+            m = messages[i].__dict__ 
+            m.pop("_sa_instance_state")
+            messages[i] = m
+        
+        return messages
     
     
     def close_session(self):

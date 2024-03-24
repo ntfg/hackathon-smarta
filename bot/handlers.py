@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import os
 import jwt
 import datetime
-import secrets
 
 from .text_parser import parse_dialogs
 from .keyboards import keyboard, edit_keyboard
@@ -14,7 +13,7 @@ from .states import WordStates
 
 load_dotenv()
     
-bot = Bot(token="")
+bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher(bot,
                 storage=MemoryStorage())
 
@@ -51,6 +50,8 @@ async def list_of_words(message, state: FSMContext):
         await bot.send_message(message.chat.id,
                                "Список успешно изменён✅",
                                reply_markup=keyboard)
+        keywords = words
+        print(keywords)
         await state.finish()
     else:
         await bot.send_message(message.chat.id,
@@ -69,7 +70,8 @@ async def get_token(message):
     jwt_payload = {
         "exp": datetime.datetime.utcnow() + datetime.timedelta(weeks=1)
     }
+    message_text = f'Этот токен будет действовать ровно неделю\n\n{jwt.encode(jwt_payload, os.getenv("JWT_KEY"), algorithm="HS256")}'
     await bot.send_message(message.chat.id,
-                           jwt.encode(jwt_payload, os.getenv("JWT_KEY"), algorithm="HS256"))
+                           message_text)
 
     
