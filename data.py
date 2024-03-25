@@ -45,6 +45,8 @@ class Database():
             m.pop("_sa_instance_state")
             messages[i] = m
         
+        #self.session.commit() - убрать комментарий если нужно помечать уже вызванные сообщения
+        
         return messages
     
     
@@ -56,12 +58,13 @@ class Database():
             m = messages[i].__dict__ 
             m.pop("_sa_instance_state")
             messages[i] = m
+            
+        #self.session.commit() - убрать комментарий если нужно помечать уже вызванные сообщения
         
         return messages
     
     
     def close_session(self):
         self.session.close()
-
 
 
