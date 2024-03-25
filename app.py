@@ -1,7 +1,6 @@
 from aiogram.utils import executor
 from bot import dp 
 from api import app
-from dotenv import load_dotenv
 import threading
 import asyncio
 import os
